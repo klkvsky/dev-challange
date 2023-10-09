@@ -81,13 +81,15 @@ export default function EditContactPopup(props: { contact: Contact, handleClose:
                 </h1>
 
                 <div className="flex flex-row items-center gap-[16px]">
-                    <Image
-                        src={photo ? photo : photoURL || "/assets/profiles/Default.png"}
-                        width={88}
-                        height={88}
-                        alt="Profile Picture"
-                        className="rounded-full overflow-hidden"
-                    />
+                    <label htmlFor="userPhoto">
+                        <Image
+                            src={photo ? photo : photoURL || "/assets/profiles/Default.png"}
+                            width={88}
+                            height={88}
+                            alt="Profile Picture"
+                            className="rounded-full overflow-hidden"
+                        />
+                    </label>
 
                     <div className="flex flex-row items-center relative">
                         <label

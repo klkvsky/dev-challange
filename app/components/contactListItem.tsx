@@ -175,7 +175,7 @@ export function ContactListItem(props: {
         </button>
 
         <motion.div
-          className="w-[calc(100vw-24px)] md:w-[219px] h-fit dark:bg-[#1E1E1E] bg-gray-100 flex flex-col dark:text-white rounded-[16px] md:rounded-[8px] overflow-hidden fixed bottom-0 left-[12px] rounded-b-none md:rounded-b-[8px] md:absolute md:left-full md:top-full border border-b-0 border-gray-200 dark:border-black/10 md:border-0"
+          className="w-full md:w-[219px] h-fit dark:bg-[#1E1E1E] bg-gray-100 flex flex-col dark:text-white rounded-[16px] md:rounded-[8px] overflow-hidden fixed bottom-0 left-0 rounded-b-none md:rounded-b-[8px] md:absolute md:left-full md:top-full border border-b-0 border-gray-200 dark:border-black/10 md:border-0"
           style={{
             pointerEvents: isMenuOpen ? "auto" : "none",
             zIndex: isMenuOpen ? 20 : -1,
