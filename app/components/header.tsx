@@ -1,11 +1,15 @@
 'use client';
 
 import Image from "next/image"
+import { ChangeEvent, useState } from "react";
+import { useRouter } from "next/navigation";
+import EditContactPopup from "./editContactPopup";
 import { useThemeMode } from "../hooks/useThemeMode"
-import { ChangeEvent } from "react";
 
 export default function Header() {
-    const { isDarkMode, toggleThemeMode } = useThemeMode();
+    const router = useRouter();
+    const { toggleThemeMode } = useThemeMode();
+    const [isAddingNewContact, setIsAddingNewContact] = useState(false);
 
     function handleOptionChange(event: ChangeEvent<HTMLSelectElement>) {
         const selectedValue = event.target.value;
@@ -83,6 +87,9 @@ export default function Header() {
 
             <button
                 className="fixed bottom-[24px] left-1/2 -translate-x-1/2 lg:relative lg:bottom-0 lg:left-0 lg:translate-x-0 h-[40px] w-fit rounded-full p-[1px] grid place-items-center bg-gradient-to-b from-[#CCCCCC] dark:from-[#3C3C3C] lg:ml-[24px]"
+                onClick={() => {
+                    setIsAddingNewContact(true);
+                }}
             >
                 <div
                     className="flex flex-row items-center gap-[8px] px-[16px] py-[8px] bg-gradient-to-b from-[#7F7F7F]/70 to-[#7F7F7F] dark:from-[#282828]/70 dark:to-[#282828] rounded-full"
@@ -114,6 +121,23 @@ export default function Header() {
                     className="invert dark:invert-0"
                 />
             </button>
+
+            {isAddingNewContact && (
+                <EditContactPopup
+                    contact={{
+                        id: Math.random(),
+                        photoURL: "",
+                        name: "",
+                        phone: "",
+                        email: "",
+                        isMuted: false,
+                        isFavorite: false,
+                    }}
+                    handleClose={() => {
+                        setIsAddingNewContact(false);
+                    }}
+                />
+            )}
         </div>
     )
 }

@@ -2,20 +2,25 @@
 
 import Image from "next/image";
 import { motion } from "framer-motion"
-import { ContactType } from "../types";
+import { Contact } from "@prisma/client";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import EditContactPopup from "./editContactPopup";
 
-export function ContactListItem(contact: ContactType) {
-  const { photoURL, name, phone, email, isMuted, isFavorite } = contact;
+export function ContactListItem(props: {
+  contact: Contact
+}) {
+  const { id, photoURL, name, phone, email, isMuted, isFavorite } = props.contact;
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
 
 
+  const router = useRouter();
   const [startY, setStartY] = useState(0);
   const [currentY, setCurrentY] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
+  const [isDeleted, setIsDeleted] = useState(false);
 
   const handleMenuButtonClick = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -38,9 +43,66 @@ export function ContactListItem(contact: ContactType) {
     };
   }, [isMobile, isMenuOpen]);
 
+
+  const removeContact = async () => {
+    setIsMenuOpen(false)
+    setIsDeleted(true)
+
+    const request = await fetch(`/api/contacts`, {
+      method: "DELETE",
+      body: JSON.stringify({
+        id: props.contact.id,
+      }),
+    })
+
+    const response = await request.json()
+    router.refresh()
+  }
+
+  const muteContact = async () => {
+    setIsMenuOpen(false)
+
+    const request = await fetch(`/api/contacts`, {
+      method: "PATCH",
+      body: JSON.stringify({
+        id: id,
+        photoURL: photoURL,
+        name: name,
+        phone: phone,
+        email: email,
+        isMuted: !isMuted,
+        isFavorite: isFavorite,
+      }),
+    })
+
+    const response = await request.json()
+    router.refresh()
+  }
+
+  const favouriteContact = async () => {
+    const request = await fetch(`/api/contacts`, {
+      method: "PATCH",
+      body: JSON.stringify({
+        id: id,
+        photoURL: photoURL,
+        name: name,
+        phone: phone,
+        email: email,
+        isMuted: isMuted,
+        isFavorite: !isFavorite,
+      }),
+    })
+
+    const response = await request.json()
+    router.refresh()
+  }
+
   return (
     <div
       className="flex flex-row items-center gap-[8px] md:gap-[16px] group md:min-h-[64px] md:h-[64px] min-h-[48px] h-[48px]"
+      style={{
+        display: isDeleted ? "none" : "flex"
+      }}
       onMouseLeave={() => !isMobile && setIsMenuOpen(false)}
     >
       <div
@@ -75,7 +137,12 @@ export function ContactListItem(contact: ContactType) {
       </div>
 
       <div className="flex flex-row items-center ml-auto gap-[8px] md:opacity-0 md:group-hover:opacity-100 transition-all relative">
-        <button className="w-[40px] h-[40px] hidden md:grid place-items-center hover:bg-[#1E1E1E] transition-all rounded-[8px] active:scale-[0.95] active:opacity-80 invert dark:invert-0">
+        <button
+          className={`w-[40px] h-[40px] hidden md:grid place-items-center hover:bg-[#1E1E1E] transition-all rounded-[8px] active:scale-[0.95] active:opacity-80 invert dark:invert-0 ${isMuted && "bg-[#1E1E1E]"} `}
+          onClick={() => {
+            muteContact()
+          }}
+        >
           <Image
             src={"/assets/Mute.svg"}
             width={24}
@@ -83,14 +150,17 @@ export function ContactListItem(contact: ContactType) {
             alt="Arrow Back Icon"
           />
         </button>
-        <button className="w-[40px] h-[40px] hidden md:grid place-items-center hover:bg-[#1E1E1E] transition-all rounded-[8px] active:scale-[0.95] active:opacity-80 invert dark:invert-0">
+        <a
+          className="w-[40px] h-[40px] hidden md:grid place-items-center hover:bg-[#1E1E1E] transition-all rounded-[8px] active:scale-[0.95] active:opacity-80 invert dark:invert-0"
+          href={`tel:${phone}`}
+        >
           <Image
             src={"/assets/Call.svg"}
             width={24}
             height={24}
             alt="Arrow Back Icon"
           />
-        </button>
+        </a>
         <button
           className={`w-[40px] h-[40px] hidden md:grid place-items-center hover:bg-[#1E1E1E]/100 transition-all rounded-[8px] active:scale-[0.95] active:opacity-80 invert dark:invert-0   
           ${isMenuOpen && "bg-[#1E1E1E]/100"}`}
@@ -160,7 +230,12 @@ export function ContactListItem(contact: ContactType) {
               </div>
             </div>
             <div className="flex flex-row items-center gap-[8px] justify-center p-[8px] md:hidden">
-              <button className="flex flex-col items-center gap-[4px] bg-white/70 dark:bg-[#232323]/70 backdrop-blur-md transition-all py-[12px] group w-full rounded-lg">
+              <button
+                className="flex flex-col items-center gap-[4px] bg-white/70 dark:bg-[#232323]/70 backdrop-blur-md transition-all py-[12px] group w-full rounded-lg"
+                onClick={() => {
+                  muteContact()
+                }}
+              >
                 <Image
                   src={"/assets/Mute.svg"}
                   width={28}
@@ -171,7 +246,10 @@ export function ContactListItem(contact: ContactType) {
 
                 <span className="text-[12px] opacity-80">Mute</span>
               </button>
-              <button className="flex flex-col items-center gap-[4px] bg-white/70 dark:bg-[#232323]/70 backdrop-blur-md transition-all py-[12px] group w-full rounded-lg">
+              <a
+                className="flex flex-col items-center gap-[4px] bg-white/70 dark:bg-[#232323]/70 backdrop-blur-md transition-all py-[12px] group w-full rounded-lg"
+                href={`tel:${phone}`}
+              >
                 <Image
                   src={"/assets/Call.svg"}
                   width={28}
@@ -181,7 +259,7 @@ export function ContactListItem(contact: ContactType) {
                 />
 
                 <span className="text-[12px] opacity-80">Call</span>
-              </button>
+              </a>
             </div>
           </div>
           <button
@@ -201,7 +279,10 @@ export function ContactListItem(contact: ContactType) {
 
             <span className="text-[14px] leading-[20px] tracking-[0.01em]">Edit</span>
           </button>
-          <button className="flex flex-row items-center gap-[12px] dark:hover:bg-[#232323] hover:bg-gray-300 transition-all py-[12px] px-[10px]">
+          <button
+            className={`flex flex-row items-center gap-[12px] dark:hover:bg-[#232323] hover:bg-gray-300 transition-all py-[12px] px-[10px] ${isFavorite && "!bg-red-500"}`}
+            onClick={favouriteContact}
+          >
             <Image
               src={"/assets/Favourite.svg"}
               width={20}
@@ -212,7 +293,10 @@ export function ContactListItem(contact: ContactType) {
 
             <span className="text-[14px] leading-[20px] tracking-[0.01em]">Favourite</span>
           </button>
-          <button className="flex flex-row items-center gap-[12px] dark:hover:bg-[#232323] hover:bg-gray-300 transition-all py-[12px] px-[10px]">
+          <button
+            className="flex flex-row items-center gap-[12px] dark:hover:bg-[#232323] hover:bg-gray-300 transition-all py-[12px] px-[10px]"
+            onClick={removeContact}
+          >
             <Image
               src={"/assets/Delete.svg"}
               width={20}
@@ -221,14 +305,16 @@ export function ContactListItem(contact: ContactType) {
               className="invert dark:invert-0"
             />
 
-            <span className="text-[14px] leading-[20px] tracking-[0.01em]">Remove</span>
+            <span className="text-[14px] leading-[20px] tracking-[0.01em]">
+              Remove
+            </span>
           </button>
         </motion.div>
       </div>
 
       {isEditing &&
         <EditContactPopup
-          contact={contact}
+          contact={props.contact}
           handleClose={() => {
             setIsEditing(false)
             setIsMenuOpen(false)
