@@ -57,7 +57,7 @@ export default function EditContactPopup(props: { contact: Contact, handleClose:
     }, [name, phone, email])
 
     return (
-        <div className="w-screen h-screen flex flex-col items-center justify-end md:grid md:place-items-center fixed top-0 left-0 z-40">
+        <div className="w-screen h-screen flex flex-col items-center justify-end md:grid md:place-items-center md:justify-center fixed top-0 left-0 z-40">
             <div
                 className="absolute w-full h-full bg-black/80 md:bg-black/40 z-0"
                 onClick={() => {
